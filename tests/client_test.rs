@@ -16,8 +16,8 @@ fn prepare() -> Config {
     }
 }
 
-#[tokio::test]
-async fn client_instantiate() {
+#[test]
+fn client_instantiate_should_work() {
     let config = prepare();
     match Client::new(&config.token, None, None) {
         Ok(_) => {

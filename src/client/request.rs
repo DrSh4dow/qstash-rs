@@ -1,22 +1,19 @@
-use reqwest::{
-    header::{self, HeaderMap},
-    Method, Url,
-};
-use serde::Serialize;
-use std::fmt;
+use reqwest::{header::HeaderMap, Method};
 
 #[derive(Debug, Clone)]
-pub enum QStashError {
-    TokenError,
-    ReqwestError,
-    InvalidUrl,
-    PublishError,
+pub enum PublishRequestUrl {
+    Url(String),
+    Topic(String),
 }
 
-#[derive(Serialize, Default)]
-pub struct PublishRequest<T> {
+#[derive(Debug, Clone)]
+pub struct PublishRequest<T>
+where
+    T: Into<reqwest::Body>,
+{
+    pub url: PublishRequestUrl,
     /// The message to send.
-    /// This can be anything as long it can be serialized.
+    /// This can be anything, but please set the `Content-Type` header accordingly.
     /// You can leave this empty if you want to send a message with no body.
     pub body: Option<T>,
 
@@ -25,8 +22,7 @@ pub struct PublishRequest<T> {
     ///
     /// We highly recommend sending a `Content-Type` header along, as this will help your destination
     /// server to understand the content of the message.
-    #[serde(skip_serializing)]
-    headers: Option<HeaderMap>,
+    pub headers: Option<HeaderMap>,
 
     /// Optionally delay the delivery of this message.
     /// In seconds.
@@ -59,7 +55,7 @@ pub struct PublishRequest<T> {
     /// same deduplication id is delivered again.
     ///
     /// When scheduling a message, the deduplication happens before the schedule is created.
-    content_based_deduplication: Option<bool>,
+    pub content_based_deduplication: Option<bool>,
 
     ///
     /// In case your destination server is unavaialble or returns a status code outside of the 200-299
@@ -69,7 +65,7 @@ pub struct PublishRequest<T> {
     ///
     /// @default The maximum retry quota associated with your account.
     ///
-    retries: Option<u32>,
+    pub retries: Option<u32>,
 
     ///
     /// Use a callback url to forward the response of your destination server to your callback url.
@@ -78,76 +74,29 @@ pub struct PublishRequest<T> {
     ///
     /// @default None
     ///
-    callback: Option<String>,
+    pub callback: Option<String>,
 
     ///
     ///The method to use when sending a request to your API
     ///
     ///@default `POST`
     ///
-    #[serde(skip_serializing)]
-    method: Option<Method>,
+    pub method: Option<Method>,
 }
 
-impl fmt::Display for QStashError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            QStashError::TokenError => write!(f, "Could not parse token"),
-            QStashError::ReqwestError => write!(f, "Reqwest failed to initialize"),
-            QStashError::InvalidUrl => write!(f, "Invalid Url"),
-            QStashError::PublishError => write!(f, "Error publishing message"),
+impl<T: Into<reqwest::Body>> PublishRequest<T> {
+    pub fn new(url: PublishRequestUrl) -> Self {
+        Self {
+            url,
+            body: None,
+            headers: None,
+            delay: None,
+            not_before: None,
+            deduplication_id: None,
+            content_based_deduplication: None,
+            retries: None,
+            callback: None,
+            method: None,
         }
-    }
-}
-
-pub struct Client {
-    pub http: reqwest::Client,
-    base_url: Url,
-}
-
-impl Client {
-    pub fn new(token: &str, base_url: Option<&str>) -> Result<Client, QStashError> {
-        // intialize default headers
-        let mut value = match header::HeaderValue::from_str(&format!("Bearer {token}")) {
-            Ok(v) => v,
-            Err(e) => {
-                let formated_string = e.to_string();
-                tracing::error!(formated_string);
-                return Err(QStashError::TokenError);
-            }
-        };
-
-        value.set_sensitive(true);
-        let mut headers = header::HeaderMap::new();
-        headers.insert(header::AUTHORIZATION, value);
-
-        // initialize reqwest client
-        let http = match reqwest::Client::builder().default_headers(headers).build() {
-            Ok(c) => c,
-            Err(e) => {
-                let formated_string = e.to_string();
-                tracing::error!(formated_string);
-                return Err(QStashError::ReqwestError);
-            }
-        };
-
-        // parsing url from the provided value or use default
-        let url = match Url::parse(base_url.unwrap_or("https://qstash.upstash.com")) {
-            Ok(u) => u,
-            Err(e) => {
-                let formated_string = e.to_string();
-                tracing::error!(formated_string);
-                return Err(QStashError::InvalidUrl);
-            }
-        };
-
-        Ok(Self {
-            http,
-            base_url: url,
-        })
-    }
-
-    pub fn publish<T>(&self, request: PublishRequest<T>) -> Result<(), QStashError> {
-        Ok(())
     }
 }

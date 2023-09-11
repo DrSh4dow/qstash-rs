@@ -10,8 +10,8 @@ use error::*;
 pub use request::*;
 
 use reqwest::{
-    header::{self},
-    Body, Url,
+    header::{self, HeaderMap},
+    Method, Url,
 };
 use serde::{Deserialize, Serialize};
 
@@ -97,10 +97,7 @@ impl Client {
         })
     }
 
-    pub async fn publish<T: Into<reqwest::Body>>(
-        &self,
-        request: PublishRequest<T>,
-    ) -> Result<Vec<QstashResponse>, QStashError> {
+    fn generate_headers(request: PublishOptions) -> Result<HeaderMap, QStashError> {
         let mut headers = request.headers.unwrap_or(header::HeaderMap::new());
 
         let method = match header::HeaderValue::from_str(
@@ -194,6 +191,13 @@ impl Client {
             headers.insert("Upstash-Callback", callback);
         }
 
+        Ok(headers)
+    }
+
+    pub async fn publish<T: Into<reqwest::Body>>(
+        &self,
+        request: PublishRequest<T>,
+    ) -> Result<Vec<QstashResponse>, QStashError> {
         let request_url = match &request.url {
             PublishRequestUrl::Url(v) => v.to_string(),
             PublishRequestUrl::Topic(v) => v.clone(),
@@ -211,8 +215,28 @@ impl Client {
             }
         };
 
+        let headers = match Client::generate_headers(PublishOptions {
+            headers: request.headers,
+            delay: request.delay,
+            not_before: request.not_before,
+            deduplication_id: request.deduplication_id,
+            content_based_deduplication: request.content_based_deduplication,
+            retries: request.retries,
+            callback: request.callback,
+            method: request.method,
+        }) {
+            Ok(h) => h,
+            Err(e) => {
+                let formated_string = e.to_string();
+                tracing::error!(formated_string);
+                return Err(QStashError::PublishError);
+            }
+        };
+
+        let request_builder = self.http.request(Method::POST, path).headers(headers);
+
         let response = match request.body {
-            Some(b) => match self.http.post(path).headers(headers).body(b).send().await {
+            Some(b) => match request_builder.body(b).send().await {
                 Ok(r) => {
                     tracing::debug!("{:?}", r);
                     r
@@ -223,7 +247,7 @@ impl Client {
                     return Err(QStashError::PublishError);
                 }
             },
-            None => match self.http.post(path).headers(headers).send().await {
+            None => match request_builder.send().await {
                 Ok(r) => {
                     tracing::debug!("{:?}", r);
                     r
@@ -296,52 +320,73 @@ impl Client {
         body: T,
         options: Option<PublishOptions>,
     ) -> Result<Vec<QstashResponse>, QStashError> {
-        let mut headers = header::HeaderMap::new();
-        headers.insert(header::CONTENT_TYPE, "application/json".parse().unwrap());
+        let request_url = match &url {
+            PublishRequestUrl::Url(v) => v.to_string(),
+            PublishRequestUrl::Topic(v) => v.clone(),
+        };
 
-        let body = match serde_json::to_vec(&body) {
-            Ok(b) => b,
+        let path = match self
+            .base_url
+            .join(&format!("/{}/publish/{}", self.version, request_url))
+        {
+            Ok(p) => p,
             Err(e) => {
                 let formated_string = e.to_string();
-                tracing::error!("Could not parse json");
                 tracing::error!(formated_string);
                 return Err(QStashError::PublishError);
             }
         };
 
-        let body: Body = body.into();
+        let headers = match options {
+            Some(options) => match Client::generate_headers(options) {
+                Ok(h) => h,
+                Err(e) => {
+                    let formated_string = e.to_string();
+                    tracing::error!(formated_string);
+                    return Err(QStashError::PublishError);
+                }
+            },
+            None => header::HeaderMap::new(),
+        };
 
-        match options {
-            Some(o) => {
-                self.publish(PublishRequest {
-                    url,
-                    body: Some(body),
-                    headers: o.headers,
-                    delay: o.delay,
-                    not_before: o.not_before,
-                    deduplication_id: o.deduplication_id,
-                    content_based_deduplication: o.content_based_deduplication,
-                    retries: o.retries,
-                    callback: o.callback,
-                    method: o.method,
-                })
-                .await
+        let response = match self
+            .http
+            .request(Method::POST, path)
+            .headers(headers)
+            .json(&body)
+            .send()
+            .await
+        {
+            Ok(r) => {
+                tracing::debug!("{:?}", r);
+                r
             }
-            None => {
-                self.publish(PublishRequest {
-                    url,
-                    body: Some(body),
-                    headers: None,
-                    delay: None,
-                    not_before: None,
-                    deduplication_id: None,
-                    content_based_deduplication: None,
-                    retries: None,
-                    callback: None,
-                    method: None,
-                })
-                .await
+            Err(e) => {
+                let formated_string = e.to_string();
+                tracing::error!(formated_string);
+                return Err(QStashError::PublishError);
             }
-        }
+        };
+
+        let response: Vec<QstashResponse> = match url {
+            PublishRequestUrl::Url(_) => match response.json().await {
+                Ok(r) => vec![r],
+                Err(e) => {
+                    let formated_string = e.to_string();
+                    tracing::error!(formated_string);
+                    return Err(QStashError::PublishError);
+                }
+            },
+            PublishRequestUrl::Topic(_) => match response.json().await {
+                Ok(r) => r,
+                Err(e) => {
+                    let formated_string = e.to_string();
+                    tracing::error!(formated_string);
+                    return Err(QStashError::PublishError);
+                }
+            },
+        };
+
+        Ok(response)
     }
 }

@@ -11,7 +11,7 @@ pub use request::*;
 
 use reqwest::{
     header::{self},
-    Url,
+    Body, Url,
 };
 use serde::{Deserialize, Serialize};
 
@@ -299,13 +299,23 @@ impl Client {
         let mut headers = header::HeaderMap::new();
         headers.insert(header::CONTENT_TYPE, "application/json".parse().unwrap());
 
-        let body = serde_json::json!(body);
+        let body = match serde_json::to_vec(&body) {
+            Ok(b) => b,
+            Err(e) => {
+                let formated_string = e.to_string();
+                tracing::error!("Could not parse json");
+                tracing::error!(formated_string);
+                return Err(QStashError::PublishError);
+            }
+        };
+
+        let body: Body = body.into();
 
         match options {
             Some(o) => {
                 self.publish(PublishRequest {
                     url,
-                    body: Some(body.to_string()),
+                    body: Some(body),
                     headers: o.headers,
                     delay: o.delay,
                     not_before: o.not_before,
@@ -320,7 +330,7 @@ impl Client {
             None => {
                 self.publish(PublishRequest {
                     url,
-                    body: Some(body.to_string()),
+                    body: Some(body),
                     headers: None,
                     delay: None,
                     not_before: None,

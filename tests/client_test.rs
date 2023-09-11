@@ -7,7 +7,7 @@ static INIT: Once = Once::new();
 
 #[derive(Deserialize, Debug)]
 struct Config {
-    token: String,
+    qstash_token: String,
 }
 
 fn prepare() -> Config {
@@ -25,7 +25,7 @@ fn prepare() -> Config {
 #[traced_test]
 fn client_instantiate_should_work() {
     let config = prepare();
-    match Client::new(&config.token, None, None) {
+    match Client::new(&config.qstash_token, None, None) {
         Ok(_) => {
             tracing::info!("Client initialized successfully!");
         }
@@ -40,7 +40,7 @@ fn client_instantiate_should_work() {
 #[traced_test]
 async fn publish_should_work() {
     let config = prepare();
-    let qstash_client = match Client::new(&config.token, None, None) {
+    let qstash_client = match Client::new(&config.qstash_token, None, None) {
         Ok(c) => {
             tracing::info!("Client initialized successfully!");
             c

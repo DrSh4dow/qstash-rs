@@ -6,6 +6,7 @@ pub enum PublishRequestUrl {
     Topic(String),
 }
 
+/// Options that Qstash allows to be used when publishing a message.
 pub struct PublishOptions {
     /// Optionally send along headers with the message.
     /// These headers will be sent to your destination.

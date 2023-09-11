@@ -266,10 +266,13 @@ impl Client {
     ///
     /// # Example
     /// ```
-    /// use qstash::client::Client;
+    /// use qstash_rs::client::{PublishRequestUrl, Client};
+    /// use std::collections::HashMap;
     ///
-    /// let qstash_client = Client::new(&config.qstash_token, None, None).expect("could not initialize client");
+    /// #[tokio::main]
+    /// async fn main() {
     ///
+    /// let qstash_client = Client::new("<QSTASH_TOKEN>", None, None).expect("could not initialize client");
     ///
     ///
     /// match qstash_client
@@ -278,21 +281,14 @@ impl Client {
     ///         HashMap::from([("test", "test")]),
     ///         None,
     ///     )
-    ///     .await
-    /// {
-    ///     Ok(r) => {
-    ///         tracing::info!("Response: {:?}", r);
-    ///         for res in r {
-    ///             if res.error.is_some() {
-    ///                 panic!("This should NOT have an error");
-    ///             }
-    ///         }
-    ///     }
-    ///     Err(e) => {
-    ///         tracing::error!("{}", e.to_string());
-    ///         panic!("Could not publish");
-    ///     }
-    /// };
+    ///     .await {
+    ///         Ok(r) => println!("{:?}",r),
+    ///         Err(err) => println!("{:?}",err),
+    ///     };
+    ///
+    /// }
+    ///
+    /// ```
     ///
     pub async fn publish_json<T: Serialize>(
         &self,

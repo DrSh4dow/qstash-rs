@@ -2,16 +2,26 @@ mod error;
 mod request;
 
 use error::*;
-use request::*;
+pub use request::*;
 
 use reqwest::{
     header::{self},
     Url,
 };
+use serde::{Deserialize, Serialize};
 
 pub enum Version {
     V1,
     V2,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct QstashResponse {
+    pub message_id: Option<String>,
+    pub url: Option<String>,
+    pub error: Option<String>,
+    pub deduplicated: Option<bool>,
 }
 
 pub struct Client {
@@ -56,7 +66,7 @@ impl Client {
         };
 
         // parsing url from the provided value or use default
-        let url = match Url::parse(base_url.unwrap_or("https://qstash.upstash.com")) {
+        let url = match Url::parse(base_url.unwrap_or("https://qstash.upstash.io")) {
             Ok(u) => u,
             Err(e) => {
                 let formated_string = e.to_string();
@@ -75,7 +85,7 @@ impl Client {
     pub async fn publish<T: Into<reqwest::Body>>(
         &self,
         request: PublishRequest<T>,
-    ) -> Result<(), QStashError> {
+    ) -> Result<Vec<QstashResponse>, QStashError> {
         let mut headers = request.headers.unwrap_or(header::HeaderMap::new());
 
         let method = match header::HeaderValue::from_str(
@@ -169,9 +179,9 @@ impl Client {
             headers.insert("Upstash-Callback", callback);
         }
 
-        let request_url = match request.url {
-            PublishRequestUrl::Url(v) => v,
-            PublishRequestUrl::Topic(v) => v,
+        let request_url = match &request.url {
+            PublishRequestUrl::Url(v) => v.to_string(),
+            PublishRequestUrl::Topic(v) => v.clone(),
         };
 
         let path = match self
@@ -186,29 +196,50 @@ impl Client {
             }
         };
 
-        match request.body {
-            Some(b) => {
-                match self.http.post(path).headers(headers).body(b).send().await {
-                    Ok(r) => tracing::info!("{:?}", r),
-                    Err(e) => {
-                        let formated_string = e.to_string();
-                        tracing::error!(formated_string);
-                        return Err(QStashError::PublishError);
-                    }
-                };
-            }
-            None => {
-                match self.http.post(path).headers(headers).send().await {
-                    Ok(r) => tracing::info!("{:?}", r),
-                    Err(e) => {
-                        let formated_string = e.to_string();
-                        tracing::error!(formated_string);
-                        return Err(QStashError::PublishError);
-                    }
-                };
-            }
+        let response = match request.body {
+            Some(b) => match self.http.post(path).headers(headers).body(b).send().await {
+                Ok(r) => {
+                    tracing::debug!("{:?}", r);
+                    r
+                }
+                Err(e) => {
+                    let formated_string = e.to_string();
+                    tracing::error!(formated_string);
+                    return Err(QStashError::PublishError);
+                }
+            },
+            None => match self.http.post(path).headers(headers).send().await {
+                Ok(r) => {
+                    tracing::debug!("{:?}", r);
+                    r
+                }
+                Err(e) => {
+                    let formated_string = e.to_string();
+                    tracing::error!(formated_string);
+                    return Err(QStashError::PublishError);
+                }
+            },
         };
 
-        Ok(())
+        let response: Vec<QstashResponse> = match request.url {
+            PublishRequestUrl::Url(_) => match response.json().await {
+                Ok(r) => vec![r],
+                Err(e) => {
+                    let formated_string = e.to_string();
+                    tracing::error!(formated_string);
+                    return Err(QStashError::PublishError);
+                }
+            },
+            PublishRequestUrl::Topic(_) => match response.json().await {
+                Ok(r) => r,
+                Err(e) => {
+                    let formated_string = e.to_string();
+                    tracing::error!(formated_string);
+                    return Err(QStashError::PublishError);
+                }
+            },
+        };
+
+        Ok(response)
     }
 }

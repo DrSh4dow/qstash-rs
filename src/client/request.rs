@@ -2,7 +2,7 @@ use reqwest::{header::HeaderMap, Method};
 
 #[derive(Debug, Clone)]
 pub enum PublishRequestUrl {
-    Url(String),
+    Url(reqwest::Url),
     Topic(String),
 }
 

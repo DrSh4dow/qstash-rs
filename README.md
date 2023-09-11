@@ -1,10 +1,33 @@
 ## qstash-rs 🦀📦: Effortless QStash Client/Server Library for Rust
+[![Crates.io](https://img.shields.io/crates/v/qstash-rs)](https://crates.io/crates/qstash-rs)
 
-Welcome to `qstash-rs` – your Rust companion for seamless integration with QStash! Manage data storage and retrieval effortlessly using this powerful client library.
+### About 📖
 
-### Features 🚀
+`qstash-rs` is a Rust library for interacting with the QStash server. It is designed to be easy to use and easy to integrate into your project.
 
-### Getting Started 🚀
+### Installation 📦
+
+Add the following to your `Cargo.toml` file:
+
+```toml
+[dependencies]
+qstash-rs = "0.1.0"
+``` 
+
+### Usage 📝
+
+```rust
+use qstash_rs::QStashClient;
+
+fn main() {
+    let mut client = QStashClient::new(/* QSTASH_TOKEN */); 
+    // ...
+}
+```
+
+### Contributing 🤝
+
+Contributions are welcome! Please feel free to submit a pull request or open an issue if you have a problem, question, or suggestion.
 
 ### License 📜
 

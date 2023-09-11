@@ -1,4 +1,4 @@
-use qstash_rs::{self, Client, PublishRequest};
+use qstash_rs::client::{Client, PublishRequest};
 use serde::Deserialize;
 use std::sync::Once;
 use tracing_test::traced_test;
@@ -53,7 +53,7 @@ async fn publish_should_work() {
 
     match qstash_client
         .publish(PublishRequest::<String> {
-            url: qstash_rs::PublishRequestUrl::Url(
+            url: qstash_rs::client::PublishRequestUrl::Url(
                 "https://google.com"
                     .parse()
                     .expect("Could not convert to URL"),
@@ -96,7 +96,7 @@ async fn publish_should_contain_error() {
 
     match qstash_client
         .publish(PublishRequest::<String> {
-            url: qstash_rs::PublishRequestUrl::Url(
+            url: qstash_rs::client::PublishRequestUrl::Url(
                 "https://google.com"
                     .parse()
                     .expect("could not convert to URL"),

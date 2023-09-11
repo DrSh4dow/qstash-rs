@@ -1,3 +1,9 @@
+//! # QStash client.
+//! This is the main struct you will use to interact with the QStash API.
+//! It is initialized with a token and optionally a base url and a version.
+//! The default base url is <https://qstash.upstash.io>.
+
+
 mod error;
 mod request;
 
@@ -10,11 +16,17 @@ use reqwest::{
 };
 use serde::{Deserialize, Serialize};
 
+/// The version of the QStash API to use.
+/// The default is V2.
 pub enum Version {
     V1,
     V2,
 }
 
+/// The response from the QStash API.
+/// If the request is successful, the response will contain a message_id and a url.
+/// The url is the url of the message in the queue.
+/// If the request is not successful, the response will contain an error.
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct QstashResponse {
@@ -24,6 +36,7 @@ pub struct QstashResponse {
     pub deduplicated: Option<bool>,
 }
 
+/// The QStash client.
 pub struct Client {
     pub http: reqwest::Client,
     base_url: Url,
@@ -31,6 +44,10 @@ pub struct Client {
 }
 
 impl Client {
+
+    /// Initialize a new QStash client.
+    /// The token is required.
+    /// The base url and version are optional.
     pub fn new(
         token: &str,
         base_url: Option<&str>,

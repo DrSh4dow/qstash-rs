@@ -10,20 +10,8 @@
 
 Add the following to your `Cargo.toml` file:
 
-```toml
-[dependencies]
-qstash-rs = "0.1.0"
-```
-
-### Usage 📝
-
-```rust
-use qstash_rs::QStashClient;
-
-fn main() {
-    let mut client = QStashClient::new(/* QSTASH_TOKEN */);
-    // ...
-}
+```bash
+cargo add qstash-rs
 ```
 
 ### Contributing 🤝

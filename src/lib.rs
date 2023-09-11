@@ -73,5 +73,9 @@
 //! }
 //!
 //! ```
+//! **Note**: Replace <QSTASH_TOKEN> with your actual API token.
+//!
+//! Happy coding!
 
 pub mod client;
+

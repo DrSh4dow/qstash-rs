@@ -1,4 +1,5 @@
 ## qstash-rs 🦀📦: Effortless QStash Client/Server Library for Rust
+
 [![Crates.io](https://img.shields.io/crates/v/qstash-rs)](https://crates.io/crates/qstash-rs)
 
 ### About 📖
@@ -12,7 +13,7 @@ Add the following to your `Cargo.toml` file:
 ```toml
 [dependencies]
 qstash-rs = "0.1.0"
-``` 
+```
 
 ### Usage 📝
 
@@ -20,7 +21,7 @@ qstash-rs = "0.1.0"
 use qstash_rs::QStashClient;
 
 fn main() {
-    let mut client = QStashClient::new(/* QSTASH_TOKEN */); 
+    let mut client = QStashClient::new(/* QSTASH_TOKEN */);
     // ...
 }
 ```

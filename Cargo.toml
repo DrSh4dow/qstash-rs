@@ -3,10 +3,22 @@ name = "qstash-rs"
 version = "0.1.0"
 edition = "2021"
 authors = ["Daniel Moretti <daniel.morettiv@gmail.com>"]
+description = "A Rust SDK for Upstash QStash"
 publish = true
 repository = "https://github.com/DrSh4dow/qstash-rs"
+homepage = "https://github.com/DrSh4dow/qstash-rs"
 license = "MIT"
-keywords = ["upstash", "qstash", "async-queue", "sdk", "webdev", "utilities"]
+readme = "README.md"
+keywords = [
+  "upstash",
+  "qstash",
+  "async-queue",
+  "sdk",
+  "webdev",
+  "utilities",
+  "api",
+  "async",
+]
 
 
 [dependencies]

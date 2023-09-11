@@ -9,16 +9,7 @@ repository = "https://github.com/DrSh4dow/qstash-rs"
 homepage = "https://github.com/DrSh4dow/qstash-rs"
 license = "MIT"
 readme = "README.md"
-keywords = [
-  "upstash",
-  "qstash",
-  "async-queue",
-  "sdk",
-  "webdev",
-  "utilities",
-  "api",
-  "async",
-]
+keywords = ["upstash", "qstash", "async-queue", "sdk", "api"]
 
 
 [dependencies]

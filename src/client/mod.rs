@@ -3,7 +3,6 @@
 //! It is initialized with a token and optionally a base url and a version.
 //! The default base url is <https://qstash.upstash.io>.
 
-
 mod error;
 mod request;
 
@@ -44,7 +43,6 @@ pub struct Client {
 }
 
 impl Client {
-
     /// Initialize a new QStash client.
     /// The token is required.
     /// The base url and version are optional.
@@ -258,5 +256,86 @@ impl Client {
         };
 
         Ok(response)
+    }
+
+    /// publishJSON is a utility wrapper around `publish` that automatically serializes the body
+    /// and sets the `Content-Type` header to `application/json`.
+    ///
+    /// body can be any serializable type.
+    ///
+    ///
+    /// # Example
+    /// ```
+    /// use qstash::client::Client;
+    ///
+    /// let qstash_client = Client::new(&config.qstash_token, None, None).expect("could not initialize client");
+    ///
+    ///
+    ///
+    /// match qstash_client
+    ///     .publish_json(
+    ///         PublishRequestUrl::Url("https://google.com".parse().expect("Could not parse URL")),
+    ///         HashMap::from([("test", "test")]),
+    ///         None,
+    ///     )
+    ///     .await
+    /// {
+    ///     Ok(r) => {
+    ///         tracing::info!("Response: {:?}", r);
+    ///         for res in r {
+    ///             if res.error.is_some() {
+    ///                 panic!("This should NOT have an error");
+    ///             }
+    ///         }
+    ///     }
+    ///     Err(e) => {
+    ///         tracing::error!("{}", e.to_string());
+    ///         panic!("Could not publish");
+    ///     }
+    /// };
+    ///
+    pub async fn publish_json<T: Serialize>(
+        &self,
+        url: PublishRequestUrl,
+        body: T,
+        options: Option<PublishOptions>,
+    ) -> Result<Vec<QstashResponse>, QStashError> {
+        let mut headers = header::HeaderMap::new();
+        headers.insert(header::CONTENT_TYPE, "application/json".parse().unwrap());
+
+        let body = serde_json::json!(body);
+
+        match options {
+            Some(o) => {
+                self.publish(PublishRequest {
+                    url,
+                    body: Some(body.to_string()),
+                    headers: o.headers,
+                    delay: o.delay,
+                    not_before: o.not_before,
+                    deduplication_id: o.deduplication_id,
+                    content_based_deduplication: o.content_based_deduplication,
+                    retries: o.retries,
+                    callback: o.callback,
+                    method: o.method,
+                })
+                .await
+            }
+            None => {
+                self.publish(PublishRequest {
+                    url,
+                    body: Some(body.to_string()),
+                    headers: None,
+                    delay: None,
+                    not_before: None,
+                    deduplication_id: None,
+                    content_based_deduplication: None,
+                    retries: None,
+                    callback: None,
+                    method: None,
+                })
+                .await
+            }
+        }
     }
 }

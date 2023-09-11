@@ -1,6 +1,6 @@
-use qstash_rs::client::{Client, PublishRequest};
+use qstash_rs::client::{Client, PublishRequest, PublishRequestUrl};
 use serde::Deserialize;
-use std::sync::Once;
+use std::{collections::HashMap, sync::Once};
 use tracing_test::traced_test;
 
 static INIT: Once = Once::new();
@@ -53,7 +53,7 @@ async fn publish_should_work() {
 
     match qstash_client
         .publish(PublishRequest::<String> {
-            url: qstash_rs::client::PublishRequestUrl::Url(
+            url: PublishRequestUrl::Url(
                 "https://google.com"
                     .parse()
                     .expect("Could not convert to URL"),
@@ -71,7 +71,12 @@ async fn publish_should_work() {
         .await
     {
         Ok(r) => {
-            tracing::info!("Success: {:?}", r);
+            tracing::info!("Response: {:?}", r);
+            for res in r {
+                if res.error.is_some() {
+                    panic!("This should NOT have an error");
+                }
+            }
         }
         Err(e) => {
             tracing::error!("{}", e.to_string());
@@ -96,7 +101,7 @@ async fn publish_should_contain_error() {
 
     match qstash_client
         .publish(PublishRequest::<String> {
-            url: qstash_rs::client::PublishRequestUrl::Url(
+            url: PublishRequestUrl::Url(
                 "https://google.com"
                     .parse()
                     .expect("could not convert to URL"),
@@ -114,10 +119,48 @@ async fn publish_should_contain_error() {
         .await
     {
         Ok(r) => {
-            tracing::info!("Success: {:?}", r);
+            tracing::info!("Response: {:?}", r);
             for res in r {
                 if res.error.is_none() {
-                    panic!("This should have an error");
+                    panic!("This SHOULD have an error");
+                }
+            }
+        }
+        Err(e) => {
+            tracing::error!("{}", e.to_string());
+            panic!("Could not publish");
+        }
+    };
+}
+
+#[tokio::test]
+#[traced_test]
+async fn publish_json_should_work() {
+    let config = prepare();
+    let qstash_client = match Client::new(&config.qstash_token, None, None) {
+        Ok(c) => {
+            tracing::info!("Client initialized successfully!");
+            c
+        }
+        Err(e) => {
+            tracing::error!("{}", e.to_string());
+            panic!("Could not initialize client");
+        }
+    };
+
+    match qstash_client
+        .publish_json(
+            PublishRequestUrl::Url("https://google.com".parse().expect("Could not parse URL")),
+            HashMap::from([("test", "test")]),
+            None,
+        )
+        .await
+    {
+        Ok(r) => {
+            tracing::info!("Response: {:?}", r);
+            for res in r {
+                if res.error.is_some() {
+                    panic!("This should NOT have an error");
                 }
             }
         }

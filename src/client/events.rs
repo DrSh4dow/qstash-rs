@@ -68,10 +68,6 @@ impl Client {
     /// If you want to receive more logs, you can use the cursor to paginate.
     ///
     /// The cursor is a unix timestamp with millisecond precision
-    ///
-    /// @example
-    /// ```rust
-    /// ```
     pub async fn get_events(
         &self,
         request: Option<EventRequest>,

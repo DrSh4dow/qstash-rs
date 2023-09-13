@@ -3,6 +3,7 @@
 //! It is initialized with a token and optionally a base url and a version.
 //! The default base url is `https://qstash.upstash.io`.
 
+pub mod dead_letter_queue;
 mod error;
 pub mod events;
 pub mod publish;

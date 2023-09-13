@@ -196,3 +196,29 @@ async fn events_should_work() {
         }
     };
 }
+
+// #[tokio::test]
+// #[traced_test]
+// async fn dlq_should_work() {
+//     let config = prepare();
+//     let qstash_client = match Client::new(&config.qstash_token, None, None) {
+//         Ok(c) => {
+//             tracing::info!("Client initialized successfully!");
+//             c
+//         }
+//         Err(e) => {
+//             tracing::error!("{}", e.to_string());
+//             panic!("Could not initialize client");
+//         }
+//     };
+//
+//     match qstash_client.get_dead_letter_queue(None).await {
+//         Ok(r) => {
+//             tracing::info!("Response: {:?}", r.text().await.expect("could not parse"));
+//         }
+//         Err(e) => {
+//             tracing::error!("{}", e.to_string());
+//             panic!("Could not get events");
+//         }
+//     };
+// }

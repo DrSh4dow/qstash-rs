@@ -1,10 +1,19 @@
-//! # Error module
+//! # error module
 //!
 //! This module contains the error type for the crate.
 //! It is used to return errors from the crate.
 
 use std::fmt;
 
+/// The error type for the crate.
+/// It is used to return errors from the crate.
+/// The errors are:
+/// - TokenError: Could not parse token
+/// - ReqwestError: Reqwest failed to initialize
+/// - InvalidUrl: Invalid Url
+/// - PublishError: Error publishing message
+/// - EventError: Error getting events
+/// - DeadLetterQueueError: Error getting DLQ List
 #[derive(Debug, Clone)]
 pub enum QStashError {
     TokenError,
@@ -12,6 +21,7 @@ pub enum QStashError {
     InvalidUrl,
     PublishError,
     EventError,
+    DeadLetterQueueError,
 }
 
 impl fmt::Display for QStashError {
@@ -22,6 +32,7 @@ impl fmt::Display for QStashError {
             QStashError::InvalidUrl => write!(f, "Invalid Url"),
             QStashError::PublishError => write!(f, "Error publishing message"),
             QStashError::EventError => write!(f, "Error getting events"),
+            QStashError::DeadLetterQueueError => write!(f, "Error getting DLQ List"),
         }
     }
 }

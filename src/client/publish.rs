@@ -1,4 +1,4 @@
-//! # Publish module
+//! # publish module
 //! This module contains the publish functionality of the QStash client.
 
 use reqwest::{
@@ -12,6 +12,10 @@ use super::{
 };
 
 impl Client {
+    /// Publish a message to the QStash API.
+    /// The message can be sent to a url or to a topic.
+    /// If the message is sent to a url, it will be sent to that url.
+    /// If the message is sent to a topic, it will be sent to all urls subscribed to that topic.
     pub async fn publish<T: Into<reqwest::Body>>(
         &self,
         request: PublishRequest<T>,

@@ -1,4 +1,4 @@
-//! # Events module
+//! # events module
 //! This module contains the methods implementation required to interact with the events endpoint.
 //! The events endpoint is used to retrieve your logs.
 
@@ -7,6 +7,7 @@ use serde_json::Value;
 
 use super::{error::QStashError, Client};
 
+/// The state of the message.
 #[derive(Debug, Serialize, Deserialize, Default)]
 pub enum State {
     CREATED,
@@ -19,6 +20,8 @@ pub enum State {
     FAILED,
 }
 
+/// The event struct.
+/// It contains the time, state, message_id, next_delivery_time, error, url, topic_name and endpoint_name.
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Event {
@@ -33,6 +36,7 @@ pub struct Event {
     pub endpoint_name: Option<String>,
 }
 
+/// Deserialize with default value.
 fn ok_or_default<'t, 'd, T, D>(deserializer: D) -> Result<T, D::Error>
 where
     T: Deserialize<'t> + Default,
@@ -42,11 +46,15 @@ where
     Ok(T::deserialize(v).unwrap_or_default())
 }
 
+/// The event request.
+/// It contains the cursor.
 #[derive(Debug)]
 pub struct EventRequest {
     pub cursor: Option<u32>,
 }
 
+/// The event response.
+/// It contains the cursor and the events.
 #[derive(Debug, Serialize, Deserialize)]
 pub struct GetEventsResponse {
     pub cursor: Option<String>,
@@ -73,7 +81,7 @@ impl Client {
             Err(e) => {
                 let formated_string = e.to_string();
                 tracing::error!(formated_string);
-                return Err(QStashError::PublishError);
+                return Err(QStashError::EventError);
             }
         };
 
@@ -100,7 +108,7 @@ impl Client {
             Err(e) => {
                 let formated_string = e.to_string();
                 tracing::error!(formated_string);
-                return Err(QStashError::PublishError);
+                return Err(QStashError::EventError);
             }
         };
 

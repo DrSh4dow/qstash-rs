@@ -1,10 +1,14 @@
-//! # Request module
+//! # request module
 //! This module contains the structs and enums that are used to make requests to the QStash API.
 //! The [`Client`] struct is the main struct that is used to make requests.
 
 use reqwest::{header::HeaderMap, Method};
 use serde::{Deserialize, Serialize};
 
+/// The request url.
+/// This can either be a url or a topic.
+/// If it is a url, the message will be sent to that url.
+/// If it is a topic, the message will be sent to all urls subscribed to that topic.
 #[derive(Debug, Clone)]
 pub enum PublishRequestUrl {
     Url(reqwest::Url),
@@ -93,11 +97,15 @@ pub struct PublishOptions {
     pub method: Option<Method>,
 }
 
+/// The request to publish a message.
+/// This struct is used to send a message to the QStash API.
 #[derive(Debug, Clone)]
 pub struct PublishRequest<T>
 where
     T: Into<reqwest::Body>,
 {
+    /// The url to send the message to.
+    /// This can either be a url or a topic.
     pub url: PublishRequestUrl,
     /// The message to send.
     /// This can be anything, but please set the `Content-Type` header accordingly.

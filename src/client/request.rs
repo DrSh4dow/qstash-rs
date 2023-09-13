@@ -19,7 +19,7 @@ pub enum PublishRequestUrl {
 /// If the request is successful, the response will contain a message_id and a url.
 /// The url is the url of the message in the queue.
 /// If the request is not successful, the response will contain an error.
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct QstashResponse {
     pub message_id: Option<String>,

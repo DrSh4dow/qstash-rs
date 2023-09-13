@@ -6,6 +6,7 @@
 pub mod dead_letter_queue;
 mod error;
 pub mod events;
+pub mod messages;
 pub mod publish;
 mod request;
 
@@ -22,6 +23,9 @@ pub enum Version {
 }
 
 /// The QStash client.
+/// It is initialized with a token and optionally a base url and a version.
+/// The default base url is `https://qstash.upstash.io`.
+/// The default version is V2.
 pub struct Client {
     pub http: reqwest::Client,
     base_url: Url,

@@ -22,6 +22,8 @@ pub enum QStashError {
     PublishError,
     EventError,
     DeadLetterQueueError,
+    GetMessageError,
+    DeleteMessageError,
 }
 
 impl fmt::Display for QStashError {
@@ -33,6 +35,8 @@ impl fmt::Display for QStashError {
             QStashError::PublishError => write!(f, "Error publishing message"),
             QStashError::EventError => write!(f, "Error getting events"),
             QStashError::DeadLetterQueueError => write!(f, "Error getting DLQ List"),
+            QStashError::GetMessageError => write!(f, "Error getting message"),
+            QStashError::DeleteMessageError => write!(f, "Error deleting message"),
         }
     }
 }

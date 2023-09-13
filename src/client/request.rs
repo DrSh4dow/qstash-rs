@@ -1,3 +1,7 @@
+//! # Request module
+//! This module contains the structs and enums that are used to make requests to the QStash API.
+//! The [`Client`] struct is the main struct that is used to make requests.
+
 use reqwest::{header::HeaderMap, Method};
 use serde::{Deserialize, Serialize};
 

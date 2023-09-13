@@ -1,5 +1,5 @@
-//! # QStash client.
-//! This is the main struct you will use to interact with the QStash API.
+//! # Client module.
+//! This module contains the main struct you will use to interact with the QStash API.
 //! It is initialized with a token and optionally a base url and a version.
 //! The default base url is `https://qstash.upstash.io`.
 

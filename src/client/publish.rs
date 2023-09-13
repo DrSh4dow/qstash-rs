@@ -1,3 +1,6 @@
+//! # Publish module
+//! This module contains the publish functionality of the QStash client.
+
 use reqwest::{
     header::{self, HeaderMap},
     Method,

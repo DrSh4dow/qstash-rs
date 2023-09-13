@@ -1,3 +1,8 @@
+//! # Error module
+//!
+//! This module contains the error type for the crate.
+//! It is used to return errors from the crate.
+
 use std::fmt;
 
 #[derive(Debug, Clone)]

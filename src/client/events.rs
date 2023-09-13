@@ -1,3 +1,7 @@
+//! # Events module
+//! This module contains the methods implementation required to interact with the events endpoint.
+//! The events endpoint is used to retrieve your logs.
+
 use serde::{Deserialize, Deserializer, Serialize};
 use serde_json::Value;
 

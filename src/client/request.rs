@@ -1,9 +1,23 @@
 use reqwest::{header::HeaderMap, Method};
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone)]
 pub enum PublishRequestUrl {
     Url(reqwest::Url),
     Topic(String),
+}
+
+/// The response from the QStash API.
+/// If the request is successful, the response will contain a message_id and a url.
+/// The url is the url of the message in the queue.
+/// If the request is not successful, the response will contain an error.
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct QstashResponse {
+    pub message_id: Option<String>,
+    pub url: Option<String>,
+    pub error: Option<String>,
+    pub deduplicated: Option<bool>,
 }
 
 /// Options that Qstash allows to be used when publishing a message.

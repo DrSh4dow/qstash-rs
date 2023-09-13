@@ -78,4 +78,3 @@
 //! Happy coding!
 
 pub mod client;
-

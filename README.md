@@ -27,7 +27,7 @@ To start using the client SDK, you need to instantiate the `Client` struct with 
 ```rust
 #[tokio::main]
 async fn main() {
-   let qstash_client = Client::new("<QSTASH_TOKEN>", None, None).unwrap();
+  let qstash_client = Client::new("<QSTASH_TOKEN>", None, None).expect("Could not create client");
 }
 ```
 
@@ -37,7 +37,7 @@ to publish a new message with a JSON body to a queue:
 ```rust
 #[tokio::main]
 async fn main() {
-    let qstash_client = Client::new("<QSTASH_TOKEN>", None, None).unwrap();
+    let qstash_client = Client::new("<QSTASH_TOKEN>", None, None).expect("Could not create client");
 
     match qstash_client
         .publish_json(

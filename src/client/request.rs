@@ -154,6 +154,7 @@ where
 }
 
 impl<T: Into<reqwest::Body>> PublishRequest<T> {
+    /// Creates a new [`PublishRequest<T>`].
     pub fn new(url: PublishRequestUrl) -> Self {
         Self {
             url,

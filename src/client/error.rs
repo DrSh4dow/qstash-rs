@@ -6,6 +6,7 @@ pub enum QStashError {
     ReqwestError,
     InvalidUrl,
     PublishError,
+    EventError,
 }
 
 impl fmt::Display for QStashError {
@@ -15,6 +16,7 @@ impl fmt::Display for QStashError {
             QStashError::ReqwestError => write!(f, "Reqwest failed to initialize"),
             QStashError::InvalidUrl => write!(f, "Invalid Url"),
             QStashError::PublishError => write!(f, "Error publishing message"),
+            QStashError::EventError => write!(f, "Error getting events"),
         }
     }
 }

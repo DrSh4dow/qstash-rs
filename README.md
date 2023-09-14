@@ -9,7 +9,7 @@
 
 ### About
 
-`qstash-rs` is a Rust library for interacting with [Upstash QStash](https://upstash.com/). It contains a client and a server (TODO) module.
+`qstash-rs` is a Rust library for interacting with [Upstash QStash](https://upstash.com/). It contains a client and a server (WIP) module.
 The client library it is a wrapper around the [Upstash QStash REST API](https://docs.upstash.com/).
 
 ### Installation

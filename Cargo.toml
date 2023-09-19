@@ -1,6 +1,6 @@
 [package]
 name = "qstash-rs"
-version = "0.4.0"
+version = "0.5.0"
 edition = "2021"
 authors = ["Daniel Moretti <daniel.morettiv@gmail.com>"]
 description = "A Rust SDK for Upstash QStash"
